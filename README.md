@@ -2,6 +2,8 @@
 
 A Telegram bot for handling file downloads and uploads with progress tracking, built with python-telegram-bot.
 
+**Dockerized version with UI will be available in the Future...**
+
 ## Features
 
 - Download files sent to the bot
