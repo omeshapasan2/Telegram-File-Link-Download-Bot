@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 anyio==3.6.1
 APScheduler==3.9.1
 cachetools==5.2.0
@@ -15,3 +16,9 @@ sniffio==1.2.0
 tornado==6.2
 tzdata==2022.1
 tzlocal==4.2
+=======
+python-telegram-bot==20.7
+requests==2.31.0
+humanize==4.9.0
+python-dotenv==1.0.0
+>>>>>>> 461a63b44541b4ba161ac119138b201b422ecb2c
