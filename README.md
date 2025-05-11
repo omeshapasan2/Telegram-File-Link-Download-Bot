@@ -9,8 +9,12 @@ A Telegram bot for handling file downloads and uploads with progress tracking, b
 ## 📌 Description
 
 **Telegram Download Bot** allows you to download any file shared through Telegram without size limitations. All downloaded files are saved directly to the server where the bot is hosted. You can also specify a custom destination path for storing downloaded files.
-
 ---
+## 🚀 Demo
+
+
+![Demo](https://media.omeshapasan.site/Static/tgbot.gif)
+
 
 ## 🚀 Features
 
