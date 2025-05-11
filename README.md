@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Telegram Download Bot
 Telegram bot to download files on Telegram with no size limit.
 
@@ -247,4 +246,3 @@ sudo journalctl -u telegram-download-bot.service -f
 ## License
 
 [MIT License](LICENSE)
->>>>>>> 461a63b44541b4ba161ac119138b201b422ecb2c
