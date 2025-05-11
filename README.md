@@ -1,78 +1,50 @@
-# Telegram Download Bot
-Telegram bot to download files on Telegram with no size limit.
-
-## Requirements
-- Python 3.7+
-
-## Install
-1. Install this bot:
-	```bash
-	git clone https://github.com/RtiM0/telegram-download-bot.git
-	cd telegram-download-bot
-	python3 -m venv env
-	source env/bin/activate
-	python -m pip install -r requirements.txt
-	deactivate
-	```
-2. Set your Bot Token (can be obtained by [@BotFather](https://t.me/BotFather)) in `line  14`
-	```python
-	TOKEN = "BOT-TOKEN"
-	```	
-	Set your output directory to store the downloaded files in `line 16`
-	```python
-	OUTPUT_DIR  =  "/home/potato/tgdownloadbot/"
-	```
-3. You need to run [Telegram Bot API Server](https://github.com/tdlib/telegram-bot-api#usage) locally on your machine to bypass the 20MB Download limit imposed with official Bot API.
-Use this [guide to quickly install Telegram Bot API Server locally](https://tdlib.github.io/telegram-bot-api/build.html).
-4. Run the Telegram Bot API Server
-	```bash
-	cd telegram-bot-api/bin/
-	./telegram-bot-api --api-id <API-ID> --api-hash <API-HASH> --local
-	```
-5. In a new terminal run the bot.
-	```bash
-	cd telegram-download-bot
-	source env/bin/activate
-	python bot.py
-	```
-## Usage
-Just send or forward the bot any document and it will download it on your server!
-=======
 # Telegram Download/Upload Bot
 
-A Telegram bot for handling file downloads and uploads with progress tracking, built with python-telegram-bot.
+A Telegram bot for handling file downloads and uploads with progress tracking, built with `python-telegram-bot`.
 
-**Dockerized version with UI will be available in the Future...**
+> **Note:** Dockerized version with UI will be available in the future.
 
-## Features
+---
 
-- Download files sent to the bot
-- Download files from direct URLs with progress tracking
-- Upload files from a specified directory to Telegram
-- Stop ongoing uploads
-- Change the download output directory
-- Track upload progress with human-readable file sizes
+## 📌 Description
 
-## Prerequisites
+**Telegram Download Bot** allows you to download any file shared through Telegram without size limitations. All downloaded files are saved directly to the server where the bot is hosted. You can also specify a custom destination path for storing downloaded files.
 
-- Python 3.7+
-- Telegram Bot API server (optional but recommended for faster file transfers)
-- A Telegram Bot Token (obtained from [@BotFather](https://t.me/BotFather))
+---
 
-## Installation
+## 🚀 Features
+
+* Download files sent to the bot via Telegram
+* Change the download output directory
+* Download files from direct URLs with progress tracking
+* Upload files from a specified directory to Telegram
+* Track upload progress with human-readable file sizes
+* Stop ongoing uploads
+
+---
+
+## 🛠️ Prerequisites
+
+* Python 3.7+
+* Telegram Bot Token (get one from [@BotFather](https://t.me/BotFather))
+* (Optional) [Telegram Bot API Server](https://github.com/tdlib/telegram-bot-api) to bypass the 20MB official limit and improve performance
+
+---
+
+## ⚙️ Installation
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/telegram-download-bot.git
+git clone https://github.com/RtiM0/telegram-download-bot.git
 cd telegram-download-bot
 ```
 
-### 2. Create a virtual environment (optional but recommended)
+### 2. Create a virtual environment (recommended)
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
 ### 3. Install dependencies
@@ -81,7 +53,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Create the requirements.txt file with the following content:
+If `requirements.txt` is missing, use:
 
 ```
 python-telegram-bot==20.7
@@ -90,68 +62,71 @@ humanize
 python-dotenv
 ```
 
-### 5. Configure environment variables
+### 4. Configure environment variables
 
-Create a `.env` file in the project directory with the following content:
+Create a `.env` file in the project root:
 
 ```
 TELEGRAM_TOKEN=your_telegram_bot_token
-BASE_URL=http://localhost:8081/bot  # Only needed if using local Telegram Bot API server
+BASE_URL=http://localhost:8081/bot  # Optional: only needed with local Bot API server
 ```
 
-Replace `your_telegram_bot_token` with the token obtained from [@BotFather](https://t.me/BotFather).
+---
 
-## Usage
+## ▶️ Usage
 
-### Start the bot
+Start the bot:
 
 ```bash
 python bot.py
 ```
 
-### Available commands
+Send or forward any document to the bot — it will be downloaded on your server!
 
-- `/start` - Welcome message
-- `/setoutputdir [path]` - Change the download directory (default: `/DATA/Media/`)
-- `/download [url]` - Download a file from a direct URL
-- `/upload [directory]` - Upload all files from a directory to Telegram
-- `/stopupload` - Stop an ongoing upload
+---
 
-## Setting up Telegram Bot API Server (Optional but recommended)
+## 💬 Commands
 
-Using the Telegram Bot API server locally improves file transfer speed significantly.
+* `/start` — Show welcome message
+* `/setoutputdir [path]` — Change the output directory
+* `/download [url]` — Download a file from a direct URL
+* `/upload [directory]` — Upload all files from a directory to Telegram
+* `/stopupload` — Stop ongoing uploads
 
-### 1. Install dependencies
+---
+
+## ⚡ Running Telegram Bot API Locally (Optional but Recommended)
+
+Using a local Telegram Bot API server can bypass size limits and increase speed.
+
+### Install dependencies
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y build-essential make git zlib1g-dev libssl-dev gperf cmake clang-14 libc++-dev libc++abi-dev
+sudo apt update
+sudo apt install -y build-essential make git zlib1g-dev libssl-dev gperf cmake clang-14 libc++-dev libc++abi-dev
 ```
 
-### 2. Clone and build the Telegram Bot API
+### Build the server
 
 ```bash
 git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 cd telegram-bot-api
-mkdir build
-cd build
+mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
 cmake --build . --target install
 ```
 
-### 3. Run the Telegram Bot API server
+### Run the server
 
 ```bash
 telegram-bot-api --api-id=YOUR_API_ID --api-hash=YOUR_API_HASH --local
 ```
 
-Replace `YOUR_API_ID` and `YOUR_API_HASH` with your values obtained from [my.telegram.org](https://my.telegram.org).
+---
 
-## Setting Up Services in Ubuntu
+## 🔧 Setting Up as a Service on Ubuntu
 
-### 1. Create a systemd service for the Telegram Bot API
-
-Create a file at `/etc/systemd/system/telegram-bot-api.service` with the following content:
+### Create `telegram-bot-api.service`
 
 ```ini
 [Unit]
@@ -163,19 +138,12 @@ Type=simple
 User=YOUR_USERNAME
 ExecStart=/usr/local/bin/telegram-bot-api --api-id=YOUR_API_ID --api-hash=YOUR_API_HASH --local
 Restart=on-failure
-RestartSec=5
-StartLimitInterval=60s
-StartLimitBurst=3
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Replace `YOUR_USERNAME`, `YOUR_API_ID`, and `YOUR_API_HASH` with your values.
-
-### 2. Create a systemd service for the Download Bot
-
-Create a file at `/etc/systemd/system/telegram-download-bot.service` with the following content:
+### Create `telegram-download-bot.service`
 
 ```ini
 [Unit]
@@ -190,59 +158,48 @@ WorkingDirectory=/path/to/telegram-download-bot
 ExecStart=/path/to/telegram-download-bot/venv/bin/python /path/to/telegram-download-bot/bot.py
 Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
-RestartSec=5
-StartLimitInterval=60s
-StartLimitBurst=3
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Replace `YOUR_USERNAME` and `/path/to/telegram-download-bot` with your actual username and the path to your bot directory.
-
-### 3. Enable and start the services
+### Enable and start services
 
 ```bash
-# Reload systemd to recognize new services
 sudo systemctl daemon-reload
-
-# Enable services to start at boot
 sudo systemctl enable telegram-bot-api.service
 sudo systemctl enable telegram-download-bot.service
-
-# Start services
 sudo systemctl start telegram-bot-api.service
 sudo systemctl start telegram-download-bot.service
-
-# Check status
-sudo systemctl status telegram-bot-api.service
-sudo systemctl status telegram-download-bot.service
 ```
 
-### 4. View logs
+### View logs
 
 ```bash
-# For Telegram Bot API server
 sudo journalctl -u telegram-bot-api.service -f
-
-# For Download Bot
 sudo journalctl -u telegram-download-bot.service -f
 ```
 
-## Obtaining Telegram API Credentials
+---
 
-1. Visit [my.telegram.org](https://my.telegram.org) and log in
-2. Click on "API development tools"
-3. Create a new application (or use an existing one)
-4. Note down the "App api_id" and "App api_hash" values
-5. Use these values in the telegram-bot-api.service configuration
+## 🔑 Get Telegram API Credentials
 
-## Troubleshooting
+1. Go to [my.telegram.org](https://my.telegram.org)
+2. Log in and navigate to "API development tools"
+3. Create an app and obtain your `api_id` and `api_hash`
 
-- If files larger than 50MB don't upload, you likely need to use the local Telegram Bot API server
-- Make sure the output directory is writable by the user running the bot
-- Check the logs for any errors using the journalctl commands above
+---
 
-## License
+## 🧰 Troubleshooting
+
+* Use the local API server to bypass file size limits
+* Ensure the output directory is writable
+* Use `journalctl` logs to investigate issues
+
+---
+
+## 📄 License
 
 [MIT License](LICENSE)
+
+---
