@@ -41,7 +41,7 @@ https://media.omeshapasan.site/Static/tgbot.gif
 
 ```bash
 git clone https://github.com/omeshapasan2/Telegram-File-Link-Download-Bot.git
-cd telegram-download-bot
+cd Telegram-File-Link-Download-Bot
 ```
 
 ### 2. Create a virtual environment (recommended)
