@@ -40,7 +40,7 @@ https://media.omeshapasan.site/Static/tgbot.gif
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/RtiM0/telegram-download-bot.git
+git clone https://github.com/omeshapasan2/Telegram-File-Link-Download-Bot.git
 cd telegram-download-bot
 ```
 
