@@ -234,8 +234,6 @@ If you want to remove the Telegram Download Bot and/or Local API Server:
 
 ✅ Using curl
 
-bash
-
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/uninstall.sh)
 ```
