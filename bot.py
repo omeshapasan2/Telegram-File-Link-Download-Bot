@@ -520,28 +520,70 @@ async def stop_upload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await update.message.reply_text("No upload in progress.")
 
 async def downloader(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle document downloads."""
+    """Handle document downloads - fixed version based on working private code."""
     document = update.message.document
     
-    if document.file_id in processed_files:
-        return
-    
-    processed_files.add(document.file_id)
+    # Send initial message
+    await update.message.reply_text(f"Downloading!!! \n\n {document.file_name} ")
+
+    # Get file from Telegram
+    file = await context.bot.get_file(document.file_id)
+
+    # Ensure output directory exists
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
+    # Create destination path
+    destination = os.path.join(OUTPUT_DIR, document.file_name)
     
     try:
-        # Get file info
-        file = await context.bot.get_file(document.file_id)
-        filename = document.file_name or f"document_{document.file_id}"
-        filepath = os.path.join(OUTPUT_DIR, filename)
+        # The key fix: Use the same approach as the working private version
+        # When using custom BASE_URL and empty base_file_url, the file is already downloaded locally
+        # and file.file_path points to the local file
         
-        # Download file
-        await file.download_to_drive(filepath)
+        # Check if the file path looks like a local path or URL
+        if file.file_path.startswith('/') or not file.file_path.startswith('http'):
+            # It's a local path, try to move it directly
+            source_path = file.file_path
+            # Remove TOKEN from path if it exists (like in working version)
+            if TOKEN and TOKEN in source_path:
+                source_path = source_path.replace(TOKEN, '')
+            
+            # Clean up the path
+            source_path = source_path.lstrip('/')
+            
+            # If source_path doesn't start with /, it might be relative to some base directory
+            # Try different approaches to locate the actual file
+            possible_paths = [
+                source_path,
+                f"/{source_path}",
+                f"/tmp/{source_path}",
+                f"/var/tmp/{source_path}",
+                file.file_path
+            ]
+            
+            moved = False
+            for test_path in possible_paths:
+                if os.path.exists(test_path):
+                    move(test_path, destination)
+                    moved = True
+                    break
+            
+            if not moved:
+                # Fallback: download using the file object
+                await file.download_to_drive(destination)
+                
+        else:
+            # It's a URL, download it normally
+            await file.download_to_drive(destination)
         
-        file_size = humanize.naturalsize(document.file_size)
-        await update.message.reply_text(f"✅ Downloaded: {filename}\nSize: {file_size}")
+        await update.message.reply_text(
+            f">••Done••< \n\n\n ■ File Location: {destination}"
+        )
         
     except Exception as e:
-        await update.message.reply_text(f"Download failed: {str(e)}")
+        logger.error(f"Download error details: file_path={file.file_path}, error={str(e)}")
+        await update.message.reply_text(f"Failed to download file: {str(e)}")
 
 # GoFile downloader command handler
 async def gofile_download(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -601,6 +643,7 @@ def main() -> None:
     # Ensure output directory exists
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
+    # Use the same configuration as your working private version
     application = Application.builder().token(TOKEN).base_url(BASE_URL).base_file_url("").read_timeout(864000).build()
 
     # Command handlers
