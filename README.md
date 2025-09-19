@@ -230,8 +230,66 @@ sudo journalctl -u telegram-download-bot.service -f
 ```
 
 ---
+## 🗑️ Uninstallation
 
+If you want to remove the Telegram Download Bot and/or Local API Server:
+
+### Quick Uninstall (Auto-Uninstaller)
+
+✅ Using curl
+
+bash
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/uninstall.sh)
+```
+
+✅ Using wget
+
+bash
+
+```bash
+wget -qO- https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/uninstall.sh | bash
+```
+
+The uninstaller will:
+
+- Detect what components are installed (Bot and/or API Server)
+- Give you options to remove specific components or everything
+- Stop and remove systemd services
+- Clean up all installation directories and files
+- Provide confirmation prompts for safety
+
+### Manual Uninstall
+
+If you prefer manual removal:
+
+bash
+
+```bash
+*# Stop services*
+sudo systemctl stop telegram-download-bot.service telegram-bot-api.service
+
+*# Disable services*
+sudo systemctl disable telegram-download-bot.service telegram-bot-api.service
+
+*# Remove service files*
+sudo rm -f /etc/systemd/system/telegram-download-bot.service
+sudo rm -f /etc/systemd/system/telegram-bot-api.service
+
+*# Remove installation directories*
+sudo rm -rf /opt/Telegram-File-Link-Download-Bot
+sudo rm -rf /opt/telegram-bot-api
+
+*# Remove API server binary*
+sudo rm -f /usr/local/bin/telegram-bot-api
+
+*# Reload systemd*
+sudo systemctl daemon-reload
+```
 ---
+
+
 
 ## 🧰 Troubleshooting
 
