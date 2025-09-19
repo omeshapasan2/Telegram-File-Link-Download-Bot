@@ -151,9 +151,10 @@ cmake --build . --target install
 
 ## 🔑 Get Telegram API Credentials
 
-1. Go to [my.telegram.org](https://my.telegram.org/)
-2. Log in and navigate to "API development tools"
-3. Create an app and obtain your `api_id` and `api_hash`
+1. Go to [https://core.telegram.org/api/obtaining_api_id](https://core.telegram.org/api/obtaining_api_id)
+2. As mentioned in Obtaining api_id Section
+3. Log in and navigate to "API development tools"
+4. Create an app and obtain your `api_id` and `api_hash`
 
 ### Run the server
 
