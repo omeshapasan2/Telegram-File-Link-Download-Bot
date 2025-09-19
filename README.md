@@ -38,6 +38,31 @@ https://media.omeshapasan.site/Static/tgbot.gif
 
 ## ⚙️ Installation
 
+---
+## ⚡ Quick Install (Auto-Installer)
+
+If you prefer a one-line install instead of manual setup, you can use the provided auto-installer script:
+
+✅ Using curl
+```bash
+bash <(curl -s https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/install.sh)
+```
+
+✅ Using wget
+```bash
+wget -qO- https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/install.sh | bash
+```
+
+This will:
+
+- Install dependencies
+- Build and run the Telegram Bot API server
+- Install and configure the bot
+- Create and enable systemd services so both auto-start on reboot
+---
+
+## ⚙️ Manual Install 
+
 ### 1. Clone the repository
 
 ```bash
