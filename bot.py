@@ -388,6 +388,8 @@ Just send me a file or use the commands above to get started!
 
 async def set_output_dir(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Set the output directory for downloads."""
+    global OUTPUT_DIR
+    
     if not context.args:
         await update.message.reply_text(f"Current output directory: {OUTPUT_DIR}")
         return
@@ -397,7 +399,6 @@ async def set_output_dir(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     try:
         # Create directory if it doesn't exist
         os.makedirs(new_dir, exist_ok=True)
-        global OUTPUT_DIR
         OUTPUT_DIR = new_dir
         await update.message.reply_text(f"Output directory set to: {new_dir}")
     except Exception as e:
