@@ -48,11 +48,6 @@ If you prefer a one-line install instead of manual setup, you can use the provid
 bash <(curl -s https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/install.sh)
 ```
 
-✅ Using wget
-```bash
-wget -qO- https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/install.sh | bash
-```
-
 This will:
 
 - Install dependencies
@@ -242,14 +237,6 @@ bash
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/uninstall.sh)
-```
-
-✅ Using wget
-
-bash
-
-```bash
-wget -qO- https://raw.githubusercontent.com/omeshapasan2/Telegram-File-Link-Download-Bot/main/uninstall.sh | bash
 ```
 
 The uninstaller will:
