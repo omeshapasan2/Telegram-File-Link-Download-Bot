@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # Configuration constants - load from environment variables
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8081/bot")
-OUTPUT_DIR = "/DATA/Media/"
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", "/DATA/Media/")
 UPDATE_INTERVAL = 3
 
 # Track processed files and upload states
@@ -365,7 +365,184 @@ class GoFileDownloader:
         
         return result
 
-# Add GoFile downloader command handler
+# Command handlers
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /start is issued."""
+    welcome_text = """
+🤖 Welcome to the Telegram File Download Bot!
+
+📋 Available commands:
+• /start - Show this help message
+• /setoutputdir <path> - Set download directory
+• /download <url> - Download from various file hosting sites
+• /gofile <url> [password] - Download from GoFile
+• /upload <directory> - Upload files from directory
+• /stopupload - Stop current upload
+
+📁 Current download directory: {}
+
+Just send me a file or use the commands above to get started!
+    """.format(OUTPUT_DIR)
+    
+    await update.message.reply_text(welcome_text)
+
+async def set_output_dir(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Set the output directory for downloads."""
+    if not context.args:
+        await update.message.reply_text(f"Current output directory: {OUTPUT_DIR}")
+        return
+    
+    new_dir = " ".join(context.args)
+    
+    try:
+        # Create directory if it doesn't exist
+        os.makedirs(new_dir, exist_ok=True)
+        global OUTPUT_DIR
+        OUTPUT_DIR = new_dir
+        await update.message.reply_text(f"Output directory set to: {new_dir}")
+    except Exception as e:
+        await update.message.reply_text(f"Failed to set output directory: {str(e)}")
+
+async def download_from_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Download from various file hosting sites."""
+    if not context.args:
+        await update.message.reply_text("Please provide a download URL.")
+        return
+    
+    url = context.args[0]
+    
+    # Simple download using requests
+    try:
+        progress_message = await update.message.reply_text(f"Starting download from: {url}")
+        
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        
+        # Extract filename from URL or content-disposition header
+        filename = None
+        if 'content-disposition' in response.headers:
+            content_disposition = response.headers['content-disposition']
+            if 'filename=' in content_disposition:
+                filename = content_disposition.split('filename=')[1].strip('"')
+        
+        if not filename:
+            filename = url.split('/')[-1] or "downloaded_file"
+        
+        filepath = os.path.join(OUTPUT_DIR, filename)
+        
+        with open(filepath, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        file_size = humanize.naturalsize(os.path.getsize(filepath))
+        await progress_message.edit_text(f"✅ Download complete!\nFile: {filename}\nSize: {file_size}\nSaved to: {filepath}")
+        
+    except Exception as e:
+        await update.message.reply_text(f"Download failed: {str(e)}")
+
+async def upload_from_directory(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Upload files from a directory."""
+    if not context.args:
+        await update.message.reply_text("Please provide a directory path.")
+        return
+    
+    directory = " ".join(context.args)
+    
+    if not os.path.exists(directory):
+        await update.message.reply_text("Directory does not exist.")
+        return
+    
+    # Initialize upload state
+    chat_id = update.effective_chat.id
+    if chat_id not in upload_states:
+        upload_states[chat_id] = UploadState()
+    
+    upload_state = upload_states[chat_id]
+    
+    if upload_state.is_uploading:
+        await update.message.reply_text("Upload already in progress. Use /stopupload to cancel.")
+        return
+    
+    upload_state.is_uploading = True
+    upload_state.should_stop = False
+    
+    try:
+        files = []
+        for root, dirs, filenames in os.walk(directory):
+            for filename in filenames:
+                if upload_state.should_stop:
+                    break
+                files.append(os.path.join(root, filename))
+        
+        if not files:
+            await update.message.reply_text("No files found in directory.")
+            return
+        
+        progress_message = await update.message.reply_text(f"Found {len(files)} files. Starting upload...")
+        
+        for i, filepath in enumerate(files):
+            if upload_state.should_stop:
+                await progress_message.edit_text("Upload cancelled.")
+                break
+            
+            try:
+                with open(filepath, 'rb') as f:
+                    await context.bot.send_document(
+                        chat_id=update.effective_chat.id,
+                        document=f,
+                        filename=os.path.basename(filepath)
+                    )
+                
+                await progress_message.edit_text(f"Uploaded {i+1}/{len(files)} files...")
+                await asyncio.sleep(1)  # Rate limiting
+                
+            except Exception as file_error:
+                logger.error(f"Failed to upload {filepath}: {file_error}")
+                continue
+        
+        if not upload_state.should_stop:
+            await progress_message.edit_text(f"✅ Upload complete! Sent {len(files)} files.")
+            
+    except Exception as e:
+        await update.message.reply_text(f"Upload failed: {str(e)}")
+    finally:
+        upload_state.is_uploading = False
+
+async def stop_upload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Stop the current upload process."""
+    chat_id = update.effective_chat.id
+    
+    if chat_id in upload_states and upload_states[chat_id].is_uploading:
+        upload_states[chat_id].should_stop = True
+        await update.message.reply_text("Upload will be stopped after current file.")
+    else:
+        await update.message.reply_text("No upload in progress.")
+
+async def downloader(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle document downloads."""
+    document = update.message.document
+    
+    if document.file_id in processed_files:
+        return
+    
+    processed_files.add(document.file_id)
+    
+    try:
+        # Get file info
+        file = await context.bot.get_file(document.file_id)
+        filename = document.file_name or f"document_{document.file_id}"
+        filepath = os.path.join(OUTPUT_DIR, filename)
+        
+        # Download file
+        await file.download_to_drive(filepath)
+        
+        file_size = humanize.naturalsize(document.file_size)
+        await update.message.reply_text(f"✅ Downloaded: {filename}\nSize: {file_size}")
+        
+    except Exception as e:
+        await update.message.reply_text(f"Download failed: {str(e)}")
+
+# GoFile downloader command handler
 async def gofile_download(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Handle GoFile downloads via the /gofile command.
@@ -405,13 +582,13 @@ async def gofile_download(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 content_dir = result["content_dir"]
                 
                 await progress_message.edit_text(
-                    f"Download complete!\nDownloaded {downloaded_files} files\nLocation: {content_dir}"
+                    f"✅ Download complete!\nDownloaded {downloaded_files} files\nLocation: {content_dir}"
                 )
             else:
-                await progress_message.edit_text(f"Failed to download: {result['message']}")
+                await progress_message.edit_text(f"❌ Failed to download: {result['message']}")
                 
     except Exception as e:
-        await progress_message.edit_text(f"Error downloading from GoFile: {str(e)}")
+        await progress_message.edit_text(f"❌ Error downloading from GoFile: {str(e)}")
 
 def main() -> None:
     """Initialize and start the bot with all command handlers."""
@@ -419,7 +596,10 @@ def main() -> None:
     if not TOKEN:
         logger.error("No TELEGRAM_TOKEN environment variable set!")
         exit(1)
-        
+    
+    # Ensure output directory exists
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
     application = Application.builder().token(TOKEN).base_url(BASE_URL).base_file_url("").read_timeout(864000).build()
 
     # Command handlers
@@ -429,12 +609,13 @@ def main() -> None:
     application.add_handler(CommandHandler("upload", upload_from_directory))
     application.add_handler(CommandHandler("stopupload", stop_upload))
     
-    # Add the new GoFile downloader command
+    # Add the GoFile downloader command
     application.add_handler(CommandHandler("gofile", gofile_download))
     
     # Message handlers
     application.add_handler(MessageHandler(filters.Document.ALL, downloader))
 
+    logger.info("Bot starting...")
     application.run_polling()
 
 if __name__ == "__main__":
